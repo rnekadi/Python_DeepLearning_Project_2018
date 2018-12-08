@@ -47,19 +47,19 @@ from keras.layers import Dense
 from keras.layers import LSTM
 #
 # Initialising the RNN
-lstm_model = Sequential()
+model = Sequential()
 #
 # Adding the input layerand the LSTM layer
-lstm_model.add(LSTM(units = 100, activation = 'relu', input_shape = (None, 1)))
+model.add(LSTM(units = 100, activation = 'relu', input_shape = (None, 1)))
 
 # Adding the output layer
-lstm_model.add(Dense(units = 1))
+model.add(Dense(units = 1))
 #
 # Compiling the RNN
-lstm_model.compile(optimizer = 'adam', loss = 'mean_squared_error', metrics=['accuracy'])
+model.compile(optimizer = 'adam', loss = 'mean_squared_error', metrics=['accuracy'])
 
 # Fitting the LSTM to the Training set
-lstm_model.fit(X_train, y_train, batch_size = 20, epochs = 400, verbose = 2)
+history = model.fit(X_train, y_train, batch_size = 20, epochs = 400, verbose = 2,validation_data=(X_test,y_test))
 
 
 
@@ -69,7 +69,7 @@ inputs = X_test
 inputs = np.reshape(inputs,(-1,1))
 inputs = sc.transform(inputs)
 inputs = np.reshape(inputs, (165, 1, 1))
-y_pred = lstm_model.predict(inputs)
+y_pred = model.predict(inputs)
 y_pred = sc.inverse_transform(y_pred)
 
 # Visualising Result
@@ -86,14 +86,40 @@ plt.legend()
 
 # Evaluating and Accuracy and Score
 
-train_score = lstm_model.evaluate(X_train, y_train, verbose=2)
+train_score = model.evaluate(X_train, y_train, verbose=2)
 
 print('Train MAE: ', round(train_score[1], 4), ', Train Loss: ', round(train_score[0], 4))
 
-score, accuracy = lstm_model.evaluate(X_train, y_train, verbose=2)
+score, accuracy = model.evaluate(X_train, y_train, verbose=2)
 
 print('Score: %.2f' %(score))
 print('Validation Accuracy: %.2f' % (accuracy))
+
+
+
+# Accuracy and Loss Plotting
+
+# Plot The LSTM LOSS
+fig1 = plt.figure()
+plt.plot(history.history['loss'], 'r', linewidth=3.0)
+plt.plot(history.history['val_loss'], 'b', linewidth=3.0)
+plt.legend(['Training loss', 'Validation Loss'], fontsize=18)
+plt.xlabel('Epochs ', fontsize=16)
+plt.ylabel('Loss', fontsize=16)
+plt.title('Loss Curves :LSTM', fontsize=16)
+
+
+
+# Plot the LSTM Accuracy
+
+fig2=plt.figure()
+plt.plot(history.history['acc'], 'r', linewidth=3.0)
+plt.plot(history.history['val_acc'], 'b', linewidth=3.0)
+plt.legend(['Training Accuracy', 'Validation Accuracy'], fontsize=18)
+plt.xlabel('Epochs ', fontsize=16)
+plt.ylabel('Accuracy', fontsize=16)
+plt.title('Accuracy Curves : LSTM', fontsize=16)
+fig2.savefig('accuracy_lstm.png')
 
 
 plt.show()

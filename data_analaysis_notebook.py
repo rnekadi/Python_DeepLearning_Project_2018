@@ -45,84 +45,84 @@ train['lang'] = train.Page.map(get_language)
 print(Counter(train.lang))
 
 # Flattening the Data using melt
-train_flattened = pd.melt(train[list(train.columns[-61:])+['Page']], id_vars=['Page', 'lang'], var_name='date',
+train_flat_table = pd.melt(train[list(train.columns[-61:])+['Page']], id_vars=['Page', 'lang'], var_name='date',
                                                               value_name='Visits')
-train_flattened['date'] = train_flattened['date'].astype('datetime64[ns]')
-train_flattened['weekend'] = ((train_flattened.date.dt.dayofweek) // 5 == 1).astype(float)
+train_flat_table['date'] = train_flat_table['date'].astype('datetime64[ns]')
+train_flat_table['weekend'] = ((train_flat_table.date.dt.dayofweek) // 5 == 1).astype(float)
 
 # Median by page
-df_median = pd.DataFrame(train_flattened.groupby(['Page'])['Visits'].median())
+df_median = pd.DataFrame(train_flat_table.groupby(['Page'])['Visits'].median())
 df_median.columns = ['median']
 
 # Average by page
-df_mean = pd.DataFrame(train_flattened.groupby(['Page'])['Visits'].mean())
+df_mean = pd.DataFrame(train_flat_table.groupby(['Page'])['Visits'].mean())
 df_mean.columns = ['mean']
 
 # Merging data
-train_flattened = train_flattened.set_index('Page').join(df_mean).join(df_median)
+train_flat_table = train_flat_table.set_index('Page').join(df_mean).join(df_median)
 
-train_flattened.reset_index(drop=False, inplace=True)
+train_flat_table.reset_index(drop=False, inplace=True)
 
-train_flattened['weekday'] = train_flattened['date'].apply(lambda x: x.weekday())
+train_flat_table['weekday'] = train_flat_table['date'].apply(lambda x: x.weekday())
 
 # Feature engineering with the date
-train_flattened['year']=train_flattened.date.dt.year
-train_flattened['month']=train_flattened.date.dt.month
-train_flattened['day']=train_flattened.date.dt.day
+train_flat_table['year']=train_flat_table.date.dt.year
+train_flat_table['month']=train_flat_table.date.dt.month
+train_flat_table['day']=train_flat_table.date.dt.day
 
-print(train_flattened.head())
+print(train_flat_table.head())
 
 # Aggregation & Visualisation
 
 
 # Mean
 plt.figure(figsize=(50, 8))
-mean_group = train_flattened[['Page', 'date', 'Visits']].groupby(['date'])['Visits'].mean()
+mean_group = train_flat_table[['Page', 'date', 'Visits']].groupby(['date'])['Visits'].mean()
 plt.plot(mean_group)
 plt.title('Time Series - Average')
 
 
 # Median
 plt.figure(figsize=(50, 8))
-median_group = train_flattened[['Page','date','Visits']].groupby(['date'])['Visits'].median()
+median_group = train_flat_table[['Page','date','Visits']].groupby(['date'])['Visits'].median()
 plt.plot(median_group, color = 'r')
 plt.title('Time Series - Median')
 
 # Std
 plt.figure(figsize=(50, 8))
-std_group = train_flattened[['Page','date','Visits']].groupby(['date'])['Visits'].std()
+std_group = train_flat_table[['Page','date','Visits']].groupby(['date'])['Visits'].std()
 plt.plot(std_group, color = 'g')
 plt.title('Time Series - STD')
 
 
 # For the next graphics
-train_flattened['month_num'] = train_flattened['month']
-train_flattened['month'].replace('11', '11 - Nov', inplace=True)
-train_flattened['month'].replace('12', '12 - Dec', inplace=True)
-train_flattened['month'].replace('10', '10 - Oct', inplace=True)
-train_flattened['month'].replace('09', '12 - Sep', inplace=True)
-train_flattened['month'].replace('08', '12 - Aug', inplace=True)
-train_flattened['month'].replace('07', '12 - Jul', inplace=True)
-train_flattened['month'].replace('06', '12 - Jun', inplace=True)
-train_flattened['month'].replace('05', '12 - May', inplace=True)
-train_flattened['month'].replace('04', '12 - Apr', inplace=True)
-train_flattened['month'].replace('03', '12 - Mar', inplace=True)
-train_flattened['month'].replace('02', '12 - Feb', inplace=True)
-train_flattened['month'].replace('01', '12 - Jan', inplace=True)
+train_flat_table['month_num'] = train_flat_table['month']
+train_flat_table['month'].replace('11', '11 - Nov', inplace=True)
+train_flat_table['month'].replace('12', '12 - Dec', inplace=True)
+train_flat_table['month'].replace('10', '10 - Oct', inplace=True)
+train_flat_table['month'].replace('09', '12 - Sep', inplace=True)
+train_flat_table['month'].replace('08', '12 - Aug', inplace=True)
+train_flat_table['month'].replace('07', '12 - Jul', inplace=True)
+train_flat_table['month'].replace('06', '12 - Jun', inplace=True)
+train_flat_table['month'].replace('05', '12 - May', inplace=True)
+train_flat_table['month'].replace('04', '12 - Apr', inplace=True)
+train_flat_table['month'].replace('03', '12 - Mar', inplace=True)
+train_flat_table['month'].replace('02', '12 - Feb', inplace=True)
+train_flat_table['month'].replace('01', '12 - Jan', inplace=True)
 
 
-train_flattened['weekday_num'] = train_flattened['weekday']
-train_flattened['weekday'].replace(0, '01 - Monday', inplace=True)
-train_flattened['weekday'].replace(1, '02 - Tuesday', inplace=True)
-train_flattened['weekday'].replace(2, '03 - Wednesday', inplace=True)
-train_flattened['weekday'].replace(3, '04 - Thursday', inplace=True)
-train_flattened['weekday'].replace(4, '05 - Friday', inplace=True)
-train_flattened['weekday'].replace(5, '06 - Saturday', inplace=True)
-train_flattened['weekday'].replace(6, '07 - Sunday', inplace=True)
+train_flat_table['weekday_num'] = train_flat_table['weekday']
+train_flat_table['weekday'].replace(0, '01 - Monday', inplace=True)
+train_flat_table['weekday'].replace(1, '02 - Tuesday', inplace=True)
+train_flat_table['weekday'].replace(2, '03 - Wednesday', inplace=True)
+train_flat_table['weekday'].replace(3, '04 - Thursday', inplace=True)
+train_flat_table['weekday'].replace(4, '05 - Friday', inplace=True)
+train_flat_table['weekday'].replace(5, '06 - Saturday', inplace=True)
+train_flat_table['weekday'].replace(6, '07 - Sunday', inplace=True)
 
 # Web traffic Across Weeks
 
-train_group = train_flattened.groupby(["month", "weekday"])['Visits'].mean().reset_index()
+train_group = train_flat_table.groupby(["month", "weekday"])['Visits'].mean().reset_index()
 train_group = train_group.pivot('weekday', 'month', 'Visits')
 train_group.sort_index(inplace=True)
 
@@ -136,7 +136,7 @@ plt.title('Web Traffic Months cross Weekdays')
 
 # Web Traffic Months Across Days
 
-train_day = train_flattened.groupby(["month", "day"])['Visits'].mean().reset_index()
+train_day = train_flat_table.groupby(["month", "day"])['Visits'].mean().reset_index()
 train_day = train_day.pivot('day', 'month', 'Visits')
 train_day.sort_index(inplace=True)
 train_day.dropna(inplace=True)
@@ -150,19 +150,19 @@ plt.title('Web Traffic Months cross days')
 # Traffic influence By Page Language
 
 
-lang_sets = {}
-lang_sets['en'] = train[train.lang=='en'].iloc[:,0:-1]
-lang_sets['ja'] = train[train.lang=='ja'].iloc[:,0:-1]
-lang_sets['de'] = train[train.lang=='de'].iloc[:,0:-1]
-lang_sets['na'] = train[train.lang=='na'].iloc[:,0:-1]
-lang_sets['fr'] = train[train.lang=='fr'].iloc[:,0:-1]
-lang_sets['zh'] = train[train.lang=='zh'].iloc[:,0:-1]
-lang_sets['ru'] = train[train.lang=='ru'].iloc[:,0:-1]
-lang_sets['es'] = train[train.lang=='es'].iloc[:,0:-1]
+tsets_lang = {}
+tsets_lang['en'] = train[train.lang=='en'].iloc[:, 0:-1]
+tsets_lang['ja'] = train[train.lang=='ja'].iloc[:, 0:-1]
+tsets_lang['de'] = train[train.lang=='de'].iloc[:, 0:-1]
+tsets_lang['na'] = train[train.lang=='na'].iloc[:, 0:-1]
+tsets_lang['fr'] = train[train.lang=='fr'].iloc[:, 0:-1]
+tsets_lang['zh'] = train[train.lang=='zh'].iloc[:, 0:-1]
+tsets_lang['ru'] = train[train.lang=='ru'].iloc[:, 0:-1]
+tsets_lang['es'] = train[train.lang=='es'].iloc[:, 0:-1]
 
 sums = {}
-for key in lang_sets:
-    sums[key] = lang_sets[key].iloc[:,1:].sum(axis=0) / lang_sets[key].shape[0]
+for key in tsets_lang:
+    sums[key] = tsets_lang[key].iloc[:,1:].sum(axis=0) / tsets_lang[key].shape[0]
 
 days = [r for r in range(sums['en'].shape[0])]
 
